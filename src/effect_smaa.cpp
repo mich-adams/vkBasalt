@@ -123,7 +123,7 @@ namespace vkBasalt
 
         SmaaOptions smaaOptions;
         smaaOptions.threshold          = pConfig->getOption<float>("smaaThreshold", 0.05f);
-        smaaOptions.depthThreshold     = pConfig->getOption<float>("smaaDepthThreshold", 0.05f);
+        smaaOptions.depthThreshold     = pConfig->getOption<float>("smaaDepthThreshold", 0.01f);
         smaaOptions.maxSearchSteps     = pConfig->getOption<int32_t>("smaaMaxSearchSteps", 32);
         smaaOptions.maxSearchStepsDiag = pConfig->getOption<int32_t>("smaaMaxSearchStepsDiag", 16);
         smaaOptions.cornerRounding     = pConfig->getOption<int32_t>("smaaCornerRounding", 25);

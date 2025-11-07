@@ -4,7 +4,7 @@ layout(constant_id = 1) const float screenHeight = 1080;
 layout(constant_id = 2) const float reverseScreenWidth = 1.0/1920.0;
 layout(constant_id = 3) const float reverseScreenHeight = 1.0/1080.0;
 layout(constant_id = 4) const float threshold = 0.05;
-layout(constant_id = 5) const float depthThreshold = 0.05;
+layout(constant_id = 5) const float depthThreshold = 0.01;
 layout(constant_id = 6) const int   maxSearchSteps = 32;
 layout(constant_id = 7) const int   maxSearchStepsDiag = 16;
 layout(constant_id = 8) const int   cornerRounding = 25;
