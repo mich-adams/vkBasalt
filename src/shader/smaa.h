@@ -351,6 +351,14 @@
 #define SMAA_DEPTH_THRESHOLD (0.1 * SMAA_THRESHOLD)
 #endif
 
+/** 
+ * SMAA_NORMAL_THRESHOLD specifies the threshold for normal edge detection.
+ * Calculate the threshold from the normal angle difference
+ */
+#ifndef SMAA_NORMAL_THRESHOLD
+#define SMAA_NORMAL_THRESHOLD 0.01
+#endif
+
 /**
  * SMAA_MAX_SEARCH_STEPS specifies the maximum steps performed in the
  * horizontal/vertical pattern searches, at each side of the pixel.
@@ -827,6 +835,84 @@ float2 SMAADepthEdgeDetectionPS(float2 texcoord,
         discard;
 
     return edges;
+}
+
+/**
+ * Helper to find normal differences
+ */
+float NormalDelta(float3 A, float3 B)
+{
+    return 1.0 - dot(A, B);
+}
+
+/**
+ * Normal edge detection, with an additional depth step
+ */
+float2 SMAANormalDepthEdgeDetectionPS(float2 texcoord,
+                                      float4 offset[3],
+                                      SMAATexture2D(normalTex),
+                                      SMAATexture2D(depthTex)) {
+    // Depth pass
+    float3 depthNeighbours = SMAAGatherNeighbours(texcoord, offset, SMAATexturePass2D(depthTex));
+    float2 depthDelta = abs(depthNeighbours.xx - float2(depthNeighbours.y, depthNeighbours.z));
+    float2 depthEdges = step(SMAA_DEPTH_THRESHOLD, depthDelta);
+    
+    // We found an ege in the depth, nothing more to do
+    if (dot(depthEdges, float2(1.0, 1.0)) > 0.0)
+        return depthEdges;
+
+    // Normal pass
+    float4 delta;
+    float2 threshold = float2(SMAA_NORMAL_THRESHOLD, SMAA_NORMAL_THRESHOLD);
+
+    // Sample XY components and reconstruct Z
+    float2 Nxy = SMAASamplePoint(normalTex, texcoord).xy;
+    float3 N = normalize(vec3(Nxy, sqrt(max(0.0, 1.0 - dot(Nxy, Nxy)))));
+
+    float2 Nleftxy = SMAASamplePoint(normalTex, offset[0].xy).xy;
+    float3 Nleft = normalize(vec3(Nleftxy, sqrt(max(0.0, 1.0 - dot(Nleftxy, Nleftxy)))));
+
+    float2 Ntopxy = SMAASamplePoint(normalTex, offset[0].zw).xy;
+    float3 Ntop = normalize(vec3(Ntopxy, sqrt(max(0.0, 1.0 - dot(Ntopxy, Ntopxy)))));
+
+    float deltaX = NormalDelta(N, Nleft);
+    float deltaY = NormalDelta(N, Ntop);
+    delta.xy = float2(deltaX, deltaY);
+
+    float2 normalEdges = step(threshold, delta.xy);
+
+    // Not an edge, discard
+    if (dot(normalEdges, float2(1.0, 1.0)) == 0.0)
+        discard;
+
+    float2 Nrightxy = SMAASamplePoint(normalTex, offset[1].xy).xy;
+    float3 Nright = normalize(vec3(Nrightxy, sqrt(max(0.0, 1.0 - dot(Nrightxy, Nrightxy)))));
+
+    float2 Nbottomxy = SMAASamplePoint(normalTex, offset[1].zw).xy;
+    float3 Nbottom = normalize(vec3(Nbottomxy, sqrt(max(0.0, 1.0 - dot(Nbottomxy, Nbottomxy)))));
+
+    float deltaRight  = NormalDelta(N, Nright);
+    float deltaBottom = NormalDelta(N, Nbottom);
+    delta.zw = float2(deltaRight, deltaBottom);
+
+    float2 maxDelta = max(delta.xy, delta.zw);
+
+    float2 Nleftleftxy = SMAASamplePoint(normalTex, offset[2].xy).xy;
+    float3 Nleftleft = normalize(vec3(Nleftleftxy, sqrt(max(0.0, 1.0 - dot(Nleftleftxy, Nleftleftxy)))));
+
+    float2 Ntoptopxy = SMAASamplePoint(normalTex, offset[2].zw).xy;
+    float3 Ntoptop = normalize(vec3(Ntoptopxy, sqrt(max(0.0, 1.0 - dot(Ntoptopxy, Ntoptopxy)))));
+
+    float deltaLeftLeft = NormalDelta(Nleft, Nleftleft);
+    float deltaTopTop   = NormalDelta(Ntop,  Ntoptop);
+    delta.zw = float2(deltaLeftLeft, deltaTopTop);
+    maxDelta = max(maxDelta.xy, delta.zw);
+
+    float finalDelta = max(maxDelta.x, maxDelta.y);
+    normalEdges.xy *= step(finalDelta,
+                           SMAA_LOCAL_CONTRAST_ADAPTATION_FACTOR * delta.xy);
+
+    return normalEdges;
 }
 
 //-----------------------------------------------------------------------------

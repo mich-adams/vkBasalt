@@ -68,16 +68,21 @@ namespace vkBasalt
                                          VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
                                          linearDepthMemory);
 
+        normalImages = createImages(pLogicalDevice,
+                                    inputImages.size(),
+                                    {imageExtent.width, imageExtent.height, 1},
+                                    VK_FORMAT_R16G16_SNORM,
+                                    VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                    normalMemory);
 
-        linearDepthImageViews = createImageViews(pLogicalDevice, VK_FORMAT_R32_SFLOAT, linearDepthImages);
-
-        inputImageViews = createImageViews(pLogicalDevice, format, inputImages);
-        
         // Fallback if we have no depth image at init time
         depthImageView = createImageViews(pLogicalDevice, format, dummyDepthImages)[0];
         Logger::debug("created depth ImageViews");
         linearDepthImageViews = createImageViews(pLogicalDevice, VK_FORMAT_R32_SFLOAT, linearDepthImages);
         Logger::debug("created linear depth ImageViews");
+        normalImageViews = createImageViews(pLogicalDevice, VK_FORMAT_R16G16_SNORM, normalImages);
+        Logger::debug("created normal ImageViews");
         inputImageViews = createImageViews(pLogicalDevice, format, inputImages);
         Logger::debug("created input ImageViews");
         edgeImageViews = createImageViews(pLogicalDevice, VK_FORMAT_B8G8R8A8_UNORM, edgeImages);
@@ -139,11 +144,14 @@ namespace vkBasalt
             float   screenHeight;
             float   reverseScreenWidth;
             float   reverseScreenHeight;
+            int32_t detectionType;
             float   threshold;
             float   depthThreshold;
+            float   normalThreshold;
             int32_t maxSearchSteps;
             int32_t maxSearchStepsDiag;
             int32_t cornerRounding;
+            int32_t debugView;
             // Depth settings
             int32_t depthInputIsUpsideDown;
             int32_t depthInputIsReverse;
@@ -156,6 +164,7 @@ namespace vkBasalt
         smaaOptions.detectionType      = pConfig->getOption<int32_t>("smaaEdgeDetection", 0);
         smaaOptions.threshold          = pConfig->getOption<float>("smaaThreshold", 0.05f);
         smaaOptions.depthThreshold     = pConfig->getOption<float>("smaaDepthThreshold", 0.01f);
+        smaaOptions.normalThreshold    = pConfig->getOption<float>("smaaNormalThreshold", 0.01f);
         smaaOptions.maxSearchSteps     = pConfig->getOption<int32_t>("smaaMaxSearchSteps", 32);
         smaaOptions.maxSearchStepsDiag = pConfig->getOption<int32_t>("smaaMaxSearchStepsDiag", 16);
         smaaOptions.cornerRounding     = pConfig->getOption<int32_t>("smaaCornerRounding", 25);
@@ -171,6 +180,9 @@ namespace vkBasalt
 
         createShaderModule(pLogicalDevice, linear_depth_frag, &depthFragmentModule);
 
+        createShaderModule(pLogicalDevice, smaa_edge_vert, &normalVertexModule);
+
+        createShaderModule(pLogicalDevice, screen_space_normal_frag, &normalFragmentModule);
 
         createShaderModule(pLogicalDevice, smaa_edge_vert, &edgeVertexModule);
 
@@ -185,6 +197,7 @@ namespace vkBasalt
         createShaderModule(pLogicalDevice, smaa_neighbor_frag, &neighborFragmentModule);
 
         depthRenderPass = createRenderPass(pLogicalDevice, VK_FORMAT_R32_SFLOAT);
+        normalRenderPass = createRenderPass(pLogicalDevice, VK_FORMAT_R16G16_SNORM);
         renderPass      = createRenderPass(pLogicalDevice, format);
         unormRenderPass = createRenderPass(pLogicalDevice, VK_FORMAT_B8G8R8A8_UNORM);
 
@@ -219,6 +232,16 @@ namespace vkBasalt
                                                      depthRenderPass,
                                                      pipelineLayout);
 
+        normalPipeline = createGraphicsPipeline(pLogicalDevice,
+                                                           normalVertexModule,
+                                                           &specializationInfo,
+                                                           "main",
+                                                           normalFragmentModule,
+                                                           &specializationInfo,
+                                                           "main",
+                                                           imageExtent,
+                                                           normalRenderPass,
+                                                           pipelineLayout);
 
         edgePipeline = createGraphicsPipeline(pLogicalDevice,
                                               edgeVertexModule,
@@ -259,7 +282,8 @@ namespace vkBasalt
                                                                   std::vector<VkImageView>(inputImageViews.size(), searchImageView),
                                                                   blendImageViews,
                                                                   std::vector<VkImageView>(inputImageViews.size(), depthImageView),
-                                                                  linearDepthImageViews};
+                                                                  linearDepthImageViews,
+                                                                  normalImageViews};
 
         imageDescriptorSets = allocateAndWriteImageSamplerDescriptorSets(pLogicalDevice,
                                                                          descriptorPool,
@@ -267,7 +291,8 @@ namespace vkBasalt
                                                                          std::vector<VkSampler>(imageViewsVector.size(), sampler),
                                                                          imageViewsVector);
 
-        depthFramebuffers    = createFramebuffers(pLogicalDevice, depthRenderPass, imageExtent, {linearDepthImageViews});
+        linearDepthFramebuffers    = createFramebuffers(pLogicalDevice, depthRenderPass, imageExtent, {linearDepthImageViews});
+        normalFramebuffers   = createFramebuffers(pLogicalDevice, normalRenderPass, imageExtent, {normalImageViews});
         edgeFramebuffers     = createFramebuffers(pLogicalDevice, unormRenderPass, imageExtent, {edgeImageViews});
         blendFramebuffers    = createFramebuffers(pLogicalDevice, unormRenderPass, imageExtent, {blendImageViews});
         neighborFramebuffers = createFramebuffers(pLogicalDevice, renderPass, imageExtent, {outputImageViews});
@@ -308,7 +333,7 @@ namespace vkBasalt
         linearDepthRenderPassBeginInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         linearDepthRenderPassBeginInfo.pNext             = nullptr;
         linearDepthRenderPassBeginInfo.renderPass        = depthRenderPass;
-        linearDepthRenderPassBeginInfo.framebuffer       = depthFramebuffers[imageIndex];
+        linearDepthRenderPassBeginInfo.framebuffer       = linearDepthFramebuffers[imageIndex];
         linearDepthRenderPassBeginInfo.renderArea.offset = {0, 0};
         linearDepthRenderPassBeginInfo.renderArea.extent = imageExtent;
         clearValue                                       = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -347,6 +372,52 @@ namespace vkBasalt
 
         Logger::debug("after depth output barrier");
 
+        VkRenderPassBeginInfo normalRenderPassBeginInfo;
+        normalRenderPassBeginInfo.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        normalRenderPassBeginInfo.pNext             = nullptr;
+        normalRenderPassBeginInfo.renderPass        = normalRenderPass;
+        normalRenderPassBeginInfo.framebuffer       = normalFramebuffers[imageIndex];
+        normalRenderPassBeginInfo.renderArea.offset = {0, 0};
+        normalRenderPassBeginInfo.renderArea.extent = imageExtent;
+        clearValue                                  = {0.0f, 0.0f, 0.0f, 0.0f};
+        normalRenderPassBeginInfo.clearValueCount   = 1;
+        normalRenderPassBeginInfo.pClearValues      = &clearValue;
+
+        pLogicalDevice->vkd.CmdBeginRenderPass(commandBuffer, &normalRenderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        Logger::debug("after normal begin render pass");
+        pLogicalDevice->vkd.CmdBindDescriptorSets(
+            commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &(imageDescriptorSets[imageIndex]), 0, nullptr);
+        Logger::debug("after normal bind descriptor set");
+        pLogicalDevice->vkd.CmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, normalPipeline);
+        Logger::debug("after normal bind pipeline");
+        pLogicalDevice->vkd.CmdDraw(commandBuffer, 3, 1, 0, 0);
+        Logger::debug("after normal draw");
+        pLogicalDevice->vkd.CmdEndRenderPass(commandBuffer);
+
+        Logger::debug("after normal calculation");
+
+        VkImageMemoryBarrier normalOutputBarrier = {};
+        normalOutputBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        normalOutputBarrier.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        normalOutputBarrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+        normalOutputBarrier.oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        normalOutputBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        normalOutputBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        normalOutputBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        normalOutputBarrier.image = normalImages[imageIndex];
+        normalOutputBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        normalOutputBarrier.subresourceRange.baseMipLevel = 0;
+        normalOutputBarrier.subresourceRange.levelCount = 1;
+        normalOutputBarrier.subresourceRange.baseArrayLayer = 0;
+        normalOutputBarrier.subresourceRange.layerCount = 1;
+
+        pLogicalDevice->vkd.CmdPipelineBarrier(
+            commandBuffer,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+            0, 0, nullptr, 0, nullptr, 1, &normalOutputBarrier);
+
+        Logger::debug("after normal pipeline barrier");
 
         // Used to make the Image accessible by the shader
         VkImageMemoryBarrier memoryBarrier;
@@ -365,24 +436,6 @@ namespace vkBasalt
         memoryBarrier.subresourceRange.levelCount     = 1;
         memoryBarrier.subresourceRange.baseArrayLayer = 0;
         memoryBarrier.subresourceRange.layerCount     = 1;
-
-        // Reverses the first Barrier
-        VkImageMemoryBarrier secondBarrier;
-        secondBarrier.sType               = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-        secondBarrier.pNext               = nullptr;
-        secondBarrier.srcAccessMask       = VK_ACCESS_SHADER_READ_BIT;
-        secondBarrier.dstAccessMask       = 0;
-        secondBarrier.oldLayout           = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        secondBarrier.newLayout           = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-        secondBarrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        secondBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        secondBarrier.image               = inputImages[imageIndex];
-
-        secondBarrier.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
-        secondBarrier.subresourceRange.baseMipLevel   = 0;
-        secondBarrier.subresourceRange.levelCount     = 1;
-        secondBarrier.subresourceRange.baseArrayLayer = 0;
-        secondBarrier.subresourceRange.layerCount     = 1;
 
         pLogicalDevice->vkd.CmdPipelineBarrier(
             commandBuffer, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr, 0, nullptr, 1, &memoryBarrier);
@@ -530,18 +583,22 @@ namespace vkBasalt
     {
         Logger::debug("destroying smaa effect " + convertToString(this));
         pLogicalDevice->vkd.DestroyPipeline(pLogicalDevice->device, linearDepthPipeline, nullptr);
+        pLogicalDevice->vkd.DestroyPipeline(pLogicalDevice->device, normalPipeline, nullptr);
         pLogicalDevice->vkd.DestroyPipeline(pLogicalDevice->device, edgePipeline, nullptr);
         pLogicalDevice->vkd.DestroyPipeline(pLogicalDevice->device, blendPipeline, nullptr);
         pLogicalDevice->vkd.DestroyPipeline(pLogicalDevice->device, neighborPipeline, nullptr);
 
         pLogicalDevice->vkd.DestroyPipelineLayout(pLogicalDevice->device, pipelineLayout, nullptr);
         pLogicalDevice->vkd.DestroyRenderPass(pLogicalDevice->device, depthRenderPass, nullptr);
+        pLogicalDevice->vkd.DestroyRenderPass(pLogicalDevice->device, normalRenderPass, nullptr);
         pLogicalDevice->vkd.DestroyRenderPass(pLogicalDevice->device, renderPass, nullptr);
         pLogicalDevice->vkd.DestroyRenderPass(pLogicalDevice->device, unormRenderPass, nullptr);
         pLogicalDevice->vkd.DestroyDescriptorSetLayout(pLogicalDevice->device, imageSamplerDescriptorSetLayout, nullptr);
 
         pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, depthVertexModule, nullptr);
         pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, depthFragmentModule, nullptr);
+        pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, normalVertexModule, nullptr);
+        pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, normalFragmentModule, nullptr);
         pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, edgeVertexModule, nullptr);
         pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, edgeFragmentModule, nullptr);
         pLogicalDevice->vkd.DestroyShaderModule(pLogicalDevice->device, blendVertexModule, nullptr);
@@ -552,12 +609,14 @@ namespace vkBasalt
         pLogicalDevice->vkd.DestroyDescriptorPool(pLogicalDevice->device, descriptorPool, nullptr);
         pLogicalDevice->vkd.FreeMemory(pLogicalDevice->device, dummyDepthMemory, nullptr);
         pLogicalDevice->vkd.FreeMemory(pLogicalDevice->device, linearDepthMemory, nullptr);
+        pLogicalDevice->vkd.FreeMemory(pLogicalDevice->device, normalMemory, nullptr);
         pLogicalDevice->vkd.FreeMemory(pLogicalDevice->device, imageMemory, nullptr);
         pLogicalDevice->vkd.FreeMemory(pLogicalDevice->device, areaMemory, nullptr);
         pLogicalDevice->vkd.FreeMemory(pLogicalDevice->device, searchMemory, nullptr);
         for (unsigned int i = 0; i < edgeFramebuffers.size(); i++)
         {
             pLogicalDevice->vkd.DestroyFramebuffer(pLogicalDevice->device, linearDepthFramebuffers[i], nullptr);
+            pLogicalDevice->vkd.DestroyFramebuffer(pLogicalDevice->device, normalFramebuffers[i], nullptr);
             pLogicalDevice->vkd.DestroyFramebuffer(pLogicalDevice->device, edgeFramebuffers[i], nullptr);
             pLogicalDevice->vkd.DestroyFramebuffer(pLogicalDevice->device, blendFramebuffers[i], nullptr);
             pLogicalDevice->vkd.DestroyFramebuffer(pLogicalDevice->device, neighborFramebuffers[i], nullptr);
@@ -567,6 +626,7 @@ namespace vkBasalt
             pLogicalDevice->vkd.DestroyImageView(pLogicalDevice->device, blendImageViews[i], nullptr);
             pLogicalDevice->vkd.DestroyImageView(pLogicalDevice->device, outputImageViews[i], nullptr);
             pLogicalDevice->vkd.DestroyImage(pLogicalDevice->device, linearDepthImages[i], nullptr);
+            pLogicalDevice->vkd.DestroyImage(pLogicalDevice->device, normalImages[i], nullptr);
             pLogicalDevice->vkd.DestroyImage(pLogicalDevice->device, edgeImages[i], nullptr);
             pLogicalDevice->vkd.DestroyImage(pLogicalDevice->device, blendImages[i], nullptr);
         }

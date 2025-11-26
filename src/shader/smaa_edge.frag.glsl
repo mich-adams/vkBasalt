@@ -25,6 +25,10 @@ void main()
         fragColor = vec4(SMAADepthEdgeDetectionPS(textureCoord, offsets, linearDepthImg), 0.0, 0.0);
     }
 
+    else if (detectionType == 3) {
+        fragColor = vec4(SMAANormalDepthEdgeDetectionPS(textureCoord, offsets, normalImg, linearDepthImg), 0.0, 0.0);
+    }
+
     else {
         fragColor = vec4(SMAALumaEdgeDetectionPS(textureCoord, offsets, colorImg), 0.0, 0.0);
     }
