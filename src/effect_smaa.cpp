@@ -153,13 +153,14 @@ namespace vkBasalt
         };
 
         SmaaOptions smaaOptions;
+        smaaOptions.detectionType      = pConfig->getOption<int32_t>("smaaEdgeDetection", 0);
         smaaOptions.threshold          = pConfig->getOption<float>("smaaThreshold", 0.05f);
         smaaOptions.depthThreshold     = pConfig->getOption<float>("smaaDepthThreshold", 0.01f);
         smaaOptions.maxSearchSteps     = pConfig->getOption<int32_t>("smaaMaxSearchSteps", 32);
         smaaOptions.maxSearchStepsDiag = pConfig->getOption<int32_t>("smaaMaxSearchStepsDiag", 16);
         smaaOptions.cornerRounding     = pConfig->getOption<int32_t>("smaaCornerRounding", 25);
-        int detectionType              = pConfig->getOption<int32_t>("smaaEdgeDetection", 0);
-
+        smaaOptions.debugView          = pConfig->getOption<int32_t>("smaaDebugView", 0);
+        
         smaaOptions.depthInputIsUpsideDown      = pConfig->getOption<int32_t>("depthInputIsUpsideDown", 0);
         smaaOptions.depthInputIsReverse         = pConfig->getOption<int32_t>("depthInputIsReverse", 0);
         smaaOptions.depthInputIsLogarithmic     = pConfig->getOption<int32_t>("depthInputIsLogarithmic", 0);

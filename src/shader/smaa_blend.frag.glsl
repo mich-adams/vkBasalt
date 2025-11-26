@@ -18,6 +18,12 @@ layout(location = 2) in vec4[3] offsets;
 
 void main()
 {
-    fragColor = SMAABlendingWeightCalculationPS(textureCoord, pixelCoord, offsets, edgesTex, areaTex, searchTex, vec4(0.0));
+    if (debugView == 1) {
+        fragColor = texture(edgesTex, textureCoord);
+    }
+
+    else {
+        fragColor = SMAABlendingWeightCalculationPS(textureCoord, pixelCoord, offsets, edgesTex, areaTex, searchTex, vec4(0.0));
+    }
 }
 
