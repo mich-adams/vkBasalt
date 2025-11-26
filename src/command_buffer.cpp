@@ -1,4 +1,5 @@
 #include "command_buffer.hpp"
+#include "effect_smaa.hpp"
 
 #include "format.hpp"
 #include "util.hpp"
@@ -42,7 +43,16 @@ namespace vkBasalt
 
         for (auto& effect : effects)
         {
-            effect->useDepthImage(depthImageView);
+            // SmaaEffect needs both VkImage and VkImageView
+            // There's probably a better solution to this, but this works well enough
+            if (SmaaEffect* smaaEffect = dynamic_cast<SmaaEffect*>(effect.get()))
+            {
+                smaaEffect->useDepthImage(depthImage, depthImageView);
+            }
+            else
+            {
+                effect->useDepthImage(depthImageView);
+            }
         }
 
         for (uint32_t i = 0; i < commandBuffers.size(); i++)

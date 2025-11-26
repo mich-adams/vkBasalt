@@ -5,6 +5,7 @@ shader_src = [
     'full_screen_triangle.vert.glsl',
     'fxaa.frag.glsl',
     'lut.frag.glsl',
+    'linear_depth.frag.glsl',
     'smaa_blend.frag.glsl',
     'smaa_blend.vert.glsl',
     'smaa_edge_color.frag.glsl',

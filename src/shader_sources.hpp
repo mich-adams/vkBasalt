@@ -60,4 +60,8 @@ namespace vkBasalt
     const std::vector<uint32_t> smaa_neighbor_vert = {
 #include "smaa_neighbor.vert.h"
     };
+
+    const std::vector<uint32_t> linear_depth_frag = {
+#include "linear_depth.frag.h"
+    };
 } // namespace vkBasalt
