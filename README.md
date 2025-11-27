@@ -10,6 +10,13 @@ Currently, the build in effects are:
 
 It is also possible to use Reshade Fx shaders.
 
+## Differences from upstream
+This fork improves depth capture for use with ReShade effects. It also includes built-in depth and screen-space normal based edge detection modes in SMAA. This reduces SMAA's effect on elements such as game UI.
+
+Note that depth capture is not perfect, and will fail in some games. There are known issues with games that use color attachments as a depth buffer. Patches are always welcome for improvements!
+
+To see the new configuration options, see `config/vkBasalt.conf`
+
 ## Disclaimer
 This is one of my first projects ever, so expect it to have bugs. Use it at your own risk.
 

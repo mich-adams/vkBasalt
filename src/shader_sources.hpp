@@ -37,12 +37,8 @@ namespace vkBasalt
 #include "smaa_blend.vert.h"
     };
 
-    const std::vector<uint32_t> smaa_edge_color_frag = {
-#include "smaa_edge_color.frag.h"
-    };
-
-    const std::vector<uint32_t> smaa_edge_luma_frag = {
-#include "smaa_edge_luma.frag.h"
+    const std::vector<uint32_t> smaa_edge_frag = {
+#include "smaa_edge.frag.h"
     };
 
     const std::vector<uint32_t> smaa_edge_vert = {
@@ -55,5 +51,13 @@ namespace vkBasalt
 
     const std::vector<uint32_t> smaa_neighbor_vert = {
 #include "smaa_neighbor.vert.h"
+    };
+
+    const std::vector<uint32_t> linear_depth_frag = {
+#include "linear_depth.frag.h"
+    };
+
+    const std::vector<uint32_t> screen_space_normal_frag = {
+#include "screen_space_normal.frag.h"
     };
 } // namespace vkBasalt

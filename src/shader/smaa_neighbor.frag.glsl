@@ -15,6 +15,12 @@ layout(location = 1) in vec4 offset;
 
 void main()
 {
-    fragColor = SMAANeighborhoodBlendingPS(textureCoord, offset, colorImg, blendTex);
+    if (debugView == 1) {
+        fragColor = texture(blendTex, textureCoord);
+    }
+
+    else {
+        fragColor = SMAANeighborhoodBlendingPS(textureCoord, offset, colorImg, blendTex);
+    }
 }
 
