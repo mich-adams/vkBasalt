@@ -17,6 +17,10 @@ namespace vkBasalt
 #include "dls.frag.h"
     };
 
+    const std::vector<uint32_t> dpx_frag = {
+#include "dpx.frag.h"
+    };
+
     const std::vector<uint32_t> full_screen_triangle_vert = {
 #include "full_screen_triangle.vert.h"
     };

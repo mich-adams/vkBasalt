@@ -33,6 +33,7 @@
 #include "effect_fxaa.hpp"
 #include "effect_cas.hpp"
 #include "effect_dls.hpp"
+#include "effect_dpx.hpp"
 #include "effect_smaa.hpp"
 #include "effect_deband.hpp"
 #include "effect_lut.hpp"
@@ -470,6 +471,12 @@ namespace vkBasalt
                     new DlsEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created DlsEffect");
             }
+            else if (effectStrings[i] == std::string("dpx"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new DpxEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created DpxEffect");
+            }
             else
             {
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(new ReshadeEffect(pLogicalDevice,
@@ -648,10 +655,11 @@ namespace vkBasalt
             VkImageCreateInfo modifiedCreateInfo = *pCreateInfo;
             modifiedCreateInfo.usage |= VK_IMAGE_USAGE_SAMPLED_BIT;
             VkResult result = pLogicalDevice->vkd.CreateImage(device, &modifiedCreateInfo, pAllocator, pImage);
-            if (pCreateInfo->extent.width == currentSwapchainExtent.width) {
+            if (pCreateInfo->extent.width == currentSwapchainExtent.width)
+            {
                 Logger::debug("depth image matches swapchain width of " + std::to_string(pCreateInfo->extent.width) + ", adding to depth image list");
-            pLogicalDevice->depthImages.push_back(*pImage);
-            pLogicalDevice->depthFormats.push_back(pCreateInfo->format);
+                pLogicalDevice->depthImages.push_back(*pImage);
+                pLogicalDevice->depthFormats.push_back(pCreateInfo->format);
             }
 
             return result;
@@ -847,7 +855,7 @@ extern "C"
 
 #define GETPROCADDR(func) \
     if (!std::strcmp(pName, "vk" #func)) \
-        return (PFN_vkVoidFunction) &vkBasalt::vkBasalt_##func;
+        return (PFN_vkVoidFunction) & vkBasalt::vkBasalt_##func;
     /*
     Return our funktions for the funktions we want to intercept
     the macro takes the name and returns our vkBasalt_##func, if the name is equal
@@ -857,7 +865,7 @@ extern "C"
 #define INTERCEPT_CALLS \
     /* instance chain functions we intercept */ \
     if (!std::strcmp(pName, "vkGetInstanceProcAddr")) \
-        return (PFN_vkVoidFunction) &vkBasalt_GetInstanceProcAddr; \
+        return (PFN_vkVoidFunction) & vkBasalt_GetInstanceProcAddr; \
     GETPROCADDR(EnumerateInstanceLayerProperties); \
     GETPROCADDR(EnumerateInstanceExtensionProperties); \
     GETPROCADDR(CreateInstance); \
@@ -865,7 +873,7 @@ extern "C"
 \
     /* device chain functions we intercept*/ \
     if (!std::strcmp(pName, "vkGetDeviceProcAddr")) \
-        return (PFN_vkVoidFunction) &vkBasalt_GetDeviceProcAddr; \
+        return (PFN_vkVoidFunction) & vkBasalt_GetDeviceProcAddr; \
     GETPROCADDR(EnumerateDeviceLayerProperties); \
     GETPROCADDR(EnumerateDeviceExtensionProperties); \
     GETPROCADDR(CreateDevice); \
