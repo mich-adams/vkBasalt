@@ -1,24 +1,17 @@
 # vkBasalt
 vkBasalt is a Vulkan post processing layer to enhance the visual graphics of games.
 
-Currently, the build in effects are:
+Currently, the built-in effects are:
 - Contrast Adaptive Sharpening
 - Denoised Luma Sharpening
+- DPX (Kodak Cineon)
 - Fast Approximate Anti-Aliasing
+- Film Noise
 - Enhanced Subpixel Morphological Anti-Aliasing
+- Vibrance
 - 3D color LookUp Table
 
 It is also possible to use Reshade Fx shaders.
-
-## Differences from upstream
-This fork improves depth capture for use with ReShade effects. It also includes built-in depth and screen-space normal based edge detection modes in SMAA. This reduces SMAA's effect on elements such as game UI.
-
-Note that depth capture is not perfect, and will fail in some games. There are known issues with games that use color attachments as a depth buffer. Patches are always welcome for improvements!
-
-To see the new configuration options, see `config/vkBasalt.conf`
-
-## Disclaimer
-This is one of my first projects ever, so expect it to have bugs. Use it at your own risk.
 
 ## Building from Source
 
@@ -54,14 +47,6 @@ Make sure that `PKG_CONFIG_PATH=/usr/lib32/pkgconfig` and `--libdir=lib32` are c
 ASFLAGS=--32 CFLAGS=-m32 CXXFLAGS=-m32 PKG_CONFIG_PATH=/usr/lib32/pkgconfig meson setup --prefix=/usr --buildtype=release --libdir=lib32 -Dwith_json=false builddir.32
 ninja -C builddir.32 install
 ```
-
-## Packaging status
-
-[Debian](https://tracker.debian.org/pkg/vkbasalt) `sudo apt install vkbasalt`
-
-[Fedora](https://src.fedoraproject.org/rpms/vkBasalt) `sudo dnf install vkBasalt`
-
-[Void Linux](https://github.com/void-linux/void-packages/blob/master/srcpkgs/vkBasalt/template) `sudo xbps-install vkBasalt`
 
 ## Usage
 Enable the layer with the environment variable.

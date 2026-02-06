@@ -12,12 +12,14 @@ vkBasalt_src = [
     'effect_deband.cpp',
     'effect_dls.cpp',
     'effect_dpx.cpp',
+    'effect_film_noise.cpp',
     'effect_fxaa.cpp',
     'effect_lut.cpp',
     'effect_reshade.cpp',
     'effect_simple.cpp',
     'effect_smaa.cpp',
     'effect_transfer.cpp',
+    'effect_vibrance.cpp',
     'fake_swapchain.cpp',
     'format.cpp',
     'framebuffer.cpp',
@@ -36,7 +38,7 @@ vkBasalt_src = [
     'stb_image.c',
     'stb_image_resize.c',
     'util.cpp',
-    'vkdispatch.cpp',
+    'vkdispatch.cpp'
 ]
 
 x11_dep = dependency('x11')

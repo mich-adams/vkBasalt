@@ -3,6 +3,7 @@ shader_src = [
     'deband.frag.glsl',
     'dls.frag.glsl',
     'dpx.frag.glsl',
+    'film_noise.frag.glsl',
     'full_screen_triangle.vert.glsl',
     'fxaa.frag.glsl',
     'lut.frag.glsl',
@@ -14,6 +15,7 @@ shader_src = [
     'smaa_edge.vert.glsl',
     'smaa_neighbor.frag.glsl',
     'smaa_neighbor.vert.glsl',
+    'vibrance.frag.glsl',
 ]
 
 glsl_compiler = find_program('glslangValidator')

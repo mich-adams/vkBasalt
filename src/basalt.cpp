@@ -30,6 +30,7 @@
 #include "logger.hpp"
 
 #include "effect.hpp"
+#include "effect_film_noise.hpp"
 #include "effect_fxaa.hpp"
 #include "effect_cas.hpp"
 #include "effect_dls.hpp"
@@ -39,6 +40,7 @@
 #include "effect_lut.hpp"
 #include "effect_reshade.hpp"
 #include "effect_transfer.hpp"
+#include "effect_vibrance.hpp"
 
 #define VKBASALT_NAME "VK_LAYER_VKBASALT_post_processing"
 
@@ -476,6 +478,18 @@ namespace vkBasalt
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
                     new DpxEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created DpxEffect");
+            }
+	    else if (effectStrings[i] == std::string("vibrance"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new VibranceEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created VibranceEffect");
+            }
+	    else if (effectStrings[i] == std::string("filmNoise"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new FilmNoiseEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created FilmNoiseEffect");
             }
             else
             {

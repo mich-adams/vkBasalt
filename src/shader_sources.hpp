@@ -21,6 +21,10 @@ namespace vkBasalt
 #include "dpx.frag.h"
     };
 
+    const std::vector<uint32_t> film_noise_frag = {
+#include "film_noise.frag.h"
+    };
+
     const std::vector<uint32_t> full_screen_triangle_vert = {
 #include "full_screen_triangle.vert.h"
     };
@@ -63,5 +67,9 @@ namespace vkBasalt
 
     const std::vector<uint32_t> screen_space_normal_frag = {
 #include "screen_space_normal.frag.h"
+    };
+
+    const std::vector<uint32_t> vibrance_frag = {
+#include "vibrance.frag.h"
     };
 } // namespace vkBasalt
