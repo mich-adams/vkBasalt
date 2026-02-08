@@ -37,6 +37,7 @@
 #include "effect_dpx.hpp"
 #include "effect_smaa.hpp"
 #include "effect_deband.hpp"
+#include "effect_lift_gamma_gain.hpp"
 #include "effect_lut.hpp"
 #include "effect_reshade.hpp"
 #include "effect_transfer.hpp"
@@ -490,6 +491,12 @@ namespace vkBasalt
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
                     new FilmNoiseEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created FilmNoiseEffect");
+            }
+	    else if (effectStrings[i] == std::string("liftGammaGain"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new LiftGammaGainEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created LiftGammaGainEffect");
             }
             else
             {

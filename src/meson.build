@@ -14,6 +14,7 @@ vkBasalt_src = [
     'effect_dpx.cpp',
     'effect_film_noise.cpp',
     'effect_fxaa.cpp',
+    'effect_lift_gamma_gain.cpp',
     'effect_lut.cpp',
     'effect_reshade.cpp',
     'effect_simple.cpp',

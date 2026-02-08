@@ -6,6 +6,7 @@ shader_src = [
     'film_noise.frag.glsl',
     'full_screen_triangle.vert.glsl',
     'fxaa.frag.glsl',
+    'lift_gamma_gain.frag.glsl',
     'lut.frag.glsl',
     'linear_depth.frag.glsl',
     'screen_space_normal.frag.glsl',
