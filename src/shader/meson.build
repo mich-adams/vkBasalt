@@ -10,6 +10,7 @@ shader_src = [
     'lut.frag.glsl',
     'linear_depth.frag.glsl',
     'screen_space_normal.frag.glsl',
+    'sepia.frag.glsl',
     'smaa_blend.frag.glsl',
     'smaa_blend.vert.glsl',
     'smaa_edge.frag.glsl',

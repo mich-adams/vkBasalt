@@ -35,6 +35,7 @@
 #include "effect_cas.hpp"
 #include "effect_dls.hpp"
 #include "effect_dpx.hpp"
+#include "effect_sepia.hpp"
 #include "effect_smaa.hpp"
 #include "effect_deband.hpp"
 #include "effect_lift_gamma_gain.hpp"
@@ -480,23 +481,29 @@ namespace vkBasalt
                     new DpxEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created DpxEffect");
             }
-	    else if (effectStrings[i] == std::string("vibrance"))
+            else if (effectStrings[i] == std::string("vibrance"))
             {
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
                     new VibranceEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created VibranceEffect");
             }
-	    else if (effectStrings[i] == std::string("filmNoise"))
+            else if (effectStrings[i] == std::string("filmnoise"))
             {
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
                     new FilmNoiseEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created FilmNoiseEffect");
             }
-	    else if (effectStrings[i] == std::string("liftGammaGain"))
+            else if (effectStrings[i] == std::string("liftgammagain"))
             {
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
                     new LiftGammaGainEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created LiftGammaGainEffect");
+            }
+            else if (effectStrings[i] == std::string("sepia"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new SepiaEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created SepiaEffect");
             }
             else
             {

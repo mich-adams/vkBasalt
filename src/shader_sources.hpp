@@ -41,6 +41,10 @@ namespace vkBasalt
 #include "lut.frag.h"
     };
 
+    const std::vector<uint32_t> sepia_frag = {
+#include "sepia.frag.h"
+    };
+
     const std::vector<uint32_t> smaa_blend_frag = {
 #include "smaa_blend.frag.h"
     };
