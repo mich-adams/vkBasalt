@@ -33,12 +33,20 @@ namespace vkBasalt
 #include "fxaa.frag.h"
     };
 
+    const std::vector<uint32_t> lens_flare_frag = {
+#include "lens_flare.frag.h"
+    };
+
     const std::vector<uint32_t> lift_gamma_gain_frag = {
 #include "lift_gamma_gain.frag.h"
     };
 
     const std::vector<uint32_t> lut_frag = {
 #include "lut.frag.h"
+    };
+
+    const std::vector<uint32_t> reinhard_frag = {
+#include "reinhard.frag.h"
     };
 
     const std::vector<uint32_t> sepia_frag = {

@@ -25,7 +25,7 @@ Before building, you will need:
 
 ### Building
 
-**These instructions use `--prefix=/usr`, which is generally not recommened since vkBasalt will be installed in directories that are meant for the package manager. The alternative is not setting the prefix, it will then be installed in `/usr/local`. But you need to make sure that `ld` finds the library since /usr/local is very likely not in the default path.** 
+**These instructions use `--prefix=/usr`, which is generally not recommended since vkBasalt will be installed in directories that are meant for the package manager. The alternative is not setting the prefix, it will then be installed in `/usr/local`. But you need to make sure that `ld` finds the library since /usr/local is very likely not in the default path.** 
 
 In general, prefer using distro provided packages.
 
@@ -110,16 +110,8 @@ By default the logger outputs to stderr, a file as output location can be set wi
 
 ## FAQ
 
-#### Why is it called vkBasalt?
-It's a joke: vulkan post processing &#8594; after vulcan &#8594; basalt
 #### Does vkBasalt work with dxvk and vkd3d?
 Yes.
-#### Will vkBasalt get me banned?
-Maybe. To my knowledge this hasn't happened yet but don't blame me if your frog dies.
-#### Will there be a openGl version?
-No. I don't know anything about openGl and I don't want to either. Also openGl has no layer system like vulkan.
-#### Will there be a GUI in the future?
-Maybe, but not soon.
 #### So is vkBasalt just a reshade port for linux?
 Not really, most of the code was written from scratch. vkBasalt directly uses reshade source code for the shader compiler (thanks [@crosire](https://github.com/crosire)), but that's about it.
 #### Does every reshade shader work?

@@ -38,8 +38,10 @@
 #include "effect_sepia.hpp"
 #include "effect_smaa.hpp"
 #include "effect_deband.hpp"
+#include "effect_lens_flare.hpp"
 #include "effect_lift_gamma_gain.hpp"
 #include "effect_lut.hpp"
+#include "effect_reinhard.hpp"
 #include "effect_reshade.hpp"
 #include "effect_transfer.hpp"
 #include "effect_vibrance.hpp"
@@ -504,6 +506,18 @@ namespace vkBasalt
                 pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
                     new SepiaEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
                 Logger::debug("created SepiaEffect");
+            }
+            else if (effectStrings[i] == std::string("lensflare"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new LensFlareEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created LensFlareEffect");
+            }
+            else if (effectStrings[i] == std::string("reinhard"))
+            {
+                pLogicalSwapchain->effects.push_back(std::shared_ptr<Effect>(
+                    new ReinhardEffect(pLogicalDevice, unormFormat, pLogicalSwapchain->imageExtent, firstImages, secondImages, pConfig.get())));
+                Logger::debug("created ReinhardEffect");
             }
             else
             {
