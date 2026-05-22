@@ -132,7 +132,7 @@ namespace vkBasalt
 
         Logger::debug("before beginn renderpass");
         pLogicalDevice->vkd.CmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-        Logger::debug("after beginn renderpass");
+        Logger::debug("after begin renderpass");
 
         pLogicalDevice->vkd.CmdBindDescriptorSets(
             commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &(imageDescriptorSets[imageIndex]), 0, nullptr);
