@@ -20,7 +20,7 @@ vec3 ReinhardSimple(vec3 x)
 
 vec3 ReinhardComplex(vec3 x, float white)
 {
-    return (x * (1.0 + (x / pow(white, 2.0)))) / (1.0 + x);
+    return (x * (1.0 + (x / (white * white)))) / (1.0 + x);
 }
 
 void main() {
