@@ -10,9 +10,10 @@
   vulkan-headers,
   stb,
   pkgsi686Linux,
+  callPackage,
+  reshade-lib ? (callPackage ./reshade.nix { }),
   vkbasalt32 ? pkgsi686Linux.callPackage ./default.nix { },
 }:
-
 stdenv.mkDerivation (finalAttrs: {
   pname = "vkbasalt";
   version = "0.4.0.0";
@@ -31,8 +32,13 @@ stdenv.mkDerivation (finalAttrs: {
     spirv-headers
     vulkan-headers
     stb
+    reshade-lib
   ];
   mesonFlags = [ "-Dappend_libdir_vkbasalt=true" ];
+
+  postFetch = ''
+    cp -f ${reshade-lib}/* src/reshade/
+  '';
 
   postInstall = lib.optionalString (stdenv.hostPlatform.system == "x86_64-linux") ''
     install -Dm 644 $src/config/vkBasalt.conf $out/share/vkBasalt/vkBasalt.conf
