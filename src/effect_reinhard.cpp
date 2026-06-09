@@ -24,8 +24,8 @@ namespace vkBasalt
     {
         float reinhardExposure     = pConfig->getOption<float>("reinhardExposure", 1.0);
         float reinhardGamma        = pConfig->getOption<float>("reinhardGamma", 2.2);
-        float reinhardUseLuminance = pConfig->getOption<float>("reinhardUseLuminance", 1);
-        float reinhardUseSimple    = pConfig->getOption<float>("reinhardUseSimple", 0);
+        int32_t reinhardUseLuminance = pConfig->getOption<int32_t>("reinhardUseLuminance", 1);
+        int32_t reinhardUseSimple    = pConfig->getOption<int32_t>("reinhardUseSimple", 0);
         float reinhardWhitePoint   = pConfig->getOption<float>("reinhardWhitePoint", 5.0);
 
         vertexCode   = full_screen_triangle_vert;

@@ -9,8 +9,8 @@ layout(set = 0, binding = 0) uniform sampler2D inputTexture;
 
 layout(constant_id = 0) const float reinhardExposure = 1.0;
 layout(constant_id = 1) const float reinhardGamma = 2.2;
-layout(constant_id = 2) const float reinhardUseLuminance = 1.0;
-layout(constant_id = 3) const float reinhardUseSimple = 0.0;
+layout(constant_id = 2) const int reinhardUseLuminance = 1;
+layout(constant_id = 3) const int reinhardUseSimple = 0;
 layout(constant_id = 4) const float reinhardWhitePoint = 5.0;
 
 vec3 ReinhardSimple(vec3 x)
