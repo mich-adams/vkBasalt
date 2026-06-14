@@ -22,9 +22,9 @@
 
 #include "util.hpp"
 
-#include "stb_image.h"
+#include <stb/stb_image.h>
 #include "stb_image_dds.h"
-#include "stb_image_resize.h"
+#include <stb/stb_image_resize2.h>
 
 namespace vkBasalt
 {
@@ -278,7 +278,15 @@ namespace vkBasalt
                 if (static_cast<uint32_t>(width) != textureExtent.width || static_cast<uint32_t>(height) != textureExtent.height)
                 {
                     resizedPixels.resize(size);
-                    stbir_resize_uint8(pixels, width, height, 0, resizedPixels.data(), textureExtent.width, textureExtent.height, 0, desiredChannels);
+                    stbir_resize_uint8_linear(pixels,
+                                              width,
+                                              height,
+                                              0,
+                                              resizedPixels.data(),
+                                              textureExtent.width,
+                                              textureExtent.height,
+                                              0,
+                                              (stbir_pixel_layout) desiredChannels);
                 }
 
                 uploadToImage(
@@ -563,7 +571,7 @@ namespace vkBasalt
             std::vector<VkSpecializationMapEntry> specMapEntrys;
             std::vector<char>                     specData;
 
-            for (uint32_t specId = 0, offset = 0; auto &opt : module.spec_constants)
+            for (uint32_t specId = 0, offset = 0; auto& opt : module.spec_constants)
             {
                 if (!opt.name.empty())
                 {

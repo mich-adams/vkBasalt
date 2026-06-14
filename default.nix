@@ -8,12 +8,14 @@
   libX11,
   spirv-headers,
   vulkan-headers,
-  stb,
   pkgsi686Linux,
   callPackage,
   reshade-lib ? (callPackage ./reshade.nix { }),
   vkbasalt32 ? pkgsi686Linux.callPackage ./default.nix { },
 }:
+let
+  stb = callPackage ./stb.nix { };
+in
 stdenv.mkDerivation (finalAttrs: {
   pname = "vkbasalt";
   version = "0.4.0.0";

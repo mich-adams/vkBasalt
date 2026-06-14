@@ -56,7 +56,7 @@
 
 namespace vkBasalt
 {
-    std::shared_ptr<Config> pConfig = nullptr;
+    std::shared_ptr<Config>              pConfig = nullptr;
 
     Logger Logger::s_instance;
 

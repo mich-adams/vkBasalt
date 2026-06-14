@@ -7,6 +7,7 @@ vkBasalt_src = [
   'command_buffer.cpp',
   'config.cpp',
   'descriptor_set.cpp',
+  'effect_bloom.cpp',
   'effect_cas.cpp',
   'effect.cpp',
   'effect_deband.cpp',
@@ -46,6 +47,7 @@ vkBasalt_src = [
 ]
 
 x11_dep = dependency('x11')
+stb_dep = dependency('stb')
 
 conf_paths = configuration_data()
 conf_paths.set_quoted('SYSCONFDIR', join_paths(get_option('prefix'), get_option('sysconfdir')))
@@ -63,7 +65,7 @@ shared_library(
   shader_include,
   link_with: [keyboard_input_x11_lib],
   include_directories: vkBasalt_include_path,
-  dependencies: [x11_dep, reshade_dep],
+  dependencies: [x11_dep, reshade_dep, stb_dep],
   gnu_symbol_visibility: 'hidden',
   install: true,
   install_dir: lib_dir,
